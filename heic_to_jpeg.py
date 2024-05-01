@@ -1,50 +1,34 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Dec 25 10:09:28 2023
-
-@author: Daaff
-"""
-
+import os
 from PIL import Image
 from pillow_heif import register_heif_opener
 
-
-def takes_input():
-    while True:
-        try:
-            heic_file = input("Please enter the input HEIC image file name: ")
-            jpeg_file_name = input("Please enter the output JPEG image file name: ")
-            
-            # Check if the file names are valid
-            with open(heic_file):
-                pass
-            with open(jpeg_file_name, 'w'):
-                pass
-            
-            return heic_file, jpeg_file_name
-        except FileNotFoundError:
-            print("File not found. Please enter valid file names.")
-        except PermissionError:
-            print("Permission denied. Please enter valid file names.")
-        except Exception as e:
-            print("An error occurred:", str(e))
-
-
-def heic_to_jpg(heic_file:str,jpeg_file_name:str):
+def heic_to_jpg(heic_file_path):
     try:
         register_heif_opener()
 
-        image = Image.open(heic_file)
-        image.save(jpeg_file_name)
+        # Open the HEIC file
+        with Image.open(heic_file_path) as img:
+            # Get the base file name without extension
+            base_filename = os.path.splitext(heic_file_path)[0]
+            # Convert and save as JPEG
+            img.convert('RGB').save(base_filename + '.jpeg', 'JPEG')
         print("Image saved successfully ...")
     except Exception as e:
         print("An error occurred:", str(e))
 
-
 def main():
-    heic_file,jpeg_file_name = takes_input()
-    heic_to_jpg(heic_file, jpeg_file_name)
-    
-    
+    # Get the current directory
+    current_directory = os.getcwd()
+    # List all files in the directory
+    files = os.listdir(current_directory)
+    # Filter HEIC files
+    heic_files = [file for file in files if file.lower().endswith('.heic')]
+    if not heic_files:
+        print("No HEIC files found in the current directory.")
+        return
+
+    for heic_file in heic_files:
+        heic_to_jpg(heic_file)
+
 if __name__ == "__main__":
     main()
